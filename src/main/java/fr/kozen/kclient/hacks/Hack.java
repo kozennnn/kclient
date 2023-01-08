@@ -1,26 +1,31 @@
 package fr.kozen.kclient.hacks;
 
-import net.fabricmc.fabric.api.client.event.lifecycle.v1.ClientTickEvents;
-import net.minecraft.client.MinecraftClient;
-import net.minecraft.client.network.ClientPlayerEntity;
+import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
 import net.minecraft.client.option.KeyBinding;
 
-public class Hack {
+public abstract class Hack {
 
-    public boolean enabled = false;
-    public KeyBinding keyBinding;
-    public ClientPlayerEntity playerEntity;
+    private String name;
+    private String description;
+    private KeyBinding keyBinding;
+    private Category category;
+    private boolean enabled;
 
-    public Hack(KeyBinding keyBinding) {
-        this.keyBinding = keyBinding;
-        ClientTickEvents.END_CLIENT_TICK.register(client -> {
-            MinecraftClient mc = MinecraftClient.getInstance();
-            this.playerEntity = mc.player;
-            while (keyBinding.wasPressed()) {
-                this.toggle();
-            }
-        });
-    }
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
+
+    public String getDescription() { return description; }
+
+    public void setDescription(String description) { this.description = description; }
+
+    public KeyBinding getKeyBinding() { return keyBinding; }
+
+    public void setKeyBinding(KeyBinding keyBinding) { this.keyBinding = KeyBindingHelper.registerKeyBinding(keyBinding); }
+
+    public Category getCategory() { return category; }
+
+    public void setCategory(Category category) { this.category = category; }
 
     public void toggle() {
         this.enabled = !this.enabled;
@@ -38,11 +43,14 @@ public class Hack {
         this.onDisabled();
     }
 
-    public void onEnabled() {}
-
-    public void onDisabled() {}
-
-    public ClientPlayerEntity getPlayerEntity() {
-        return this.playerEntity;
+    public boolean isEnabled() {
+        return enabled;
     }
+
+    public abstract void onEnabled();
+
+    public abstract void onDisabled();
+
+    public abstract void onTick();
+
 }

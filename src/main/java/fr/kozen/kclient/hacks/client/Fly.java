@@ -1,56 +1,64 @@
 package fr.kozen.kclient.hacks.client;
 
+import fr.kozen.kclient.hacks.Category;
 import fr.kozen.kclient.hacks.Hack;
-import net.fabricmc.fabric.api.client.keybinding.v1.KeyBindingHelper;
+import net.minecraft.client.MinecraftClient;
+import net.minecraft.client.network.ClientPlayerEntity;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-import java.util.Timer;
-import java.util.TimerTask;
-
 public class Fly extends Hack {
 
-        private static final KeyBinding FLY_KEY = KeyBindingHelper.registerKeyBinding(new KeyBinding("key.fly", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F, "key.categories.movement"));
+    private static Integer count;
 
-        private static Timer timer;
-        private static Fly flyInstance;
+    public Fly() {
+        this.setName("Fly");
+        this.setDescription("Allow you to fly like in creative mode.");
+        this.setKeyBinding(new KeyBinding("key.fly", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F, "key.categories.kclient"));
+        this.setCategory(Category.MOVEMENT);
+    }
 
-        public Fly() {
-                super(FLY_KEY);
-                flyInstance = this;
+    @Override
+    public void onEnabled() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        ClientPlayerEntity playerEntity = mc.player;
+        playerEntity.getAbilities().allowFlying = true;
+        playerEntity.sendMessage(Text.literal("Flying enabled."), false);
+    }
+
+    @Override
+    public void onDisabled() {
+        MinecraftClient mc = MinecraftClient.getInstance();
+        ClientPlayerEntity playerEntity = mc.player;
+        playerEntity.getAbilities().allowFlying = false;
+        playerEntity.sendMessage(Text.literal("Flying disabled."), false);
+    }
+
+    @Override
+    public void onTick() {
+        if(this.isEnabled()) {
+            if (count == 37) {
+                count = 0;
+                MinecraftClient mc = MinecraftClient.getInstance();
+                ClientPlayerEntity playerEntity = mc.player;
+                if (playerEntity == null || !playerEntity.getAbilities().allowFlying) {
+                    this.disable();
+                    return;
+                }
+                if (!playerEntity.getAbilities().flying) return;
+                // Bypass the anti-cheat by simulating a player fall.
+                if (playerEntity.getVelocity().getY() > 0) {
+                    playerEntity.setVelocity(playerEntity.getVelocity().add(0, -0.03126 * (playerEntity.getVelocity().getY() * 59), 0));
+                } else {
+                    playerEntity.setVelocity(playerEntity.getVelocity().add(0, -0.03126, 0));
+                }
+            }
+            count++;
+        } else {
+            count = 0;
         }
-
-        @Override
-        public void onEnabled() {
-                this.getPlayerEntity().getAbilities().allowFlying = true;
-                this.getPlayerEntity().sendMessage(Text.literal("Flying enabled."), false);
-
-                timer = new Timer();
-                timer.scheduleAtFixedRate(new TimerTask() {
-                        @Override
-                        public void run() {
-                                if (flyInstance.getPlayerEntity() == null || !flyInstance.getPlayerEntity().getAbilities().allowFlying) {
-                                        flyInstance.disable();
-                                        this.cancel();
-                                        return;
-                                }
-                                if (!flyInstance.getPlayerEntity().getAbilities().flying) return;
-                                // Bypass the anti-cheat by simulating a player fall.
-                                if(flyInstance.getPlayerEntity().getVelocity().getY() > 0) {
-                                        flyInstance.getPlayerEntity().setVelocity(flyInstance.getPlayerEntity().getVelocity().add(0, -0.03126 * (flyInstance.getPlayerEntity().getVelocity().getY() * 59), 0));
-                                } else {
-                                        flyInstance.getPlayerEntity().setVelocity(flyInstance.getPlayerEntity().getVelocity().add(0, -0.03126, 0));
-                                }
-                        }
-                }, 200, 1000);
-        }
-
-        @Override
-        public void onDisabled() {
-                this.getPlayerEntity().getAbilities().allowFlying = false;
-                this.getPlayerEntity().sendMessage(Text.literal("Flying disabled."), false);
-        }
+    }
 
 }

@@ -1,7 +1,8 @@
 package fr.kozen.kclient;
 
 
-import fr.kozen.kclient.hacks.client.Fly;
+import fr.kozen.kclient.gui.HudManager;
+import fr.kozen.kclient.hacks.HackManager;
 import net.fabricmc.api.ModInitializer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,6 +13,11 @@ public class KClient implements ModInitializer {
     // That way, it's clear which mod wrote info, warnings, and errors.
     public static final Logger LOGGER = LoggerFactory.getLogger("kclient");
 
+    private static KClient kClient;
+
+    private HackManager hackManager;
+    private HudManager hudManager;
+
     @Override
     public void onInitialize() {
         // This code runs as soon as Minecraft is in a mod-load-ready state.
@@ -20,6 +26,23 @@ public class KClient implements ModInitializer {
 
         LOGGER.info("Hello Fabric world!");
 
-        Fly flyHack = new Fly();
+        kClient = this;
+
+        this.initialise();
     }
+
+    public void initialise() {
+        this.hackManager = new HackManager();
+        this.hudManager = new HudManager();
+    }
+
+    public void tick() {
+        this.hackManager.tick();
+    }
+
+    public HackManager getHackManager() { return hackManager; }
+
+    public HudManager getHudManager() { return hudManager; }
+
+    public static KClient getInstance() { return kClient; }
 }

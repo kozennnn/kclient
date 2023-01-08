@@ -6,7 +6,9 @@
   "mixins": [
   ],
   "client": [
-    "KClientClient"
+    "KClientClient",
+    "InGameHudMixin",
+    "MinecraftClientMixin"
   ],
   "injectors": {
     "defaultRequire": 1
