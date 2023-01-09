@@ -9,14 +9,14 @@ import net.minecraft.client.util.InputUtil;
 import net.minecraft.text.Text;
 import org.lwjgl.glfw.GLFW;
 
-public class Fly extends Hack {
+public class Speed extends Hack {
 
     private static Integer count;
 
-    public Fly() {
-        this.setName("Fly");
+    public Speed() {
+        this.setName("Speed");
         this.setDescription("Allow you to fly like in creative mode.");
-        this.setKeyBinding(new KeyBinding("key.fly", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_F, "key.categories.kclient"));
+        this.setKeyBinding(new KeyBinding("key.speed", InputUtil.Type.KEYSYM, GLFW.GLFW_KEY_R, "key.categories.kclient"));
         this.setCategory(Category.MOVEMENT);
     }
 
@@ -39,8 +39,7 @@ public class Fly extends Hack {
     @Override
     public void onTick() {
         if(this.isEnabled()) {
-            //if (count == 37) {
-            if (count == 18) {
+            if (count == 37) {
                 count = 0;
                 MinecraftClient mc = MinecraftClient.getInstance();
                 ClientPlayerEntity playerEntity = mc.player;

@@ -38,6 +38,7 @@ public class KClient implements ModInitializer {
 
     public void tick() {
         this.hackManager.tick();
+        this.hudManager.tick();
     }
 
     public HackManager getHackManager() { return hackManager; }
