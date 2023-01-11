@@ -2,12 +2,16 @@ package fr.kozen.kclient.gui;
 
 import fr.kozen.kclient.KClient;
 import fr.kozen.kclient.hacks.Category;
+import fr.kozen.kclient.utils.RenderUtils;
 import net.minecraft.client.MinecraftClient;
 import net.minecraft.client.font.TextRenderer;
 import net.minecraft.client.gui.DrawableHelper;
 import net.minecraft.client.gui.hud.InGameHud;
 import net.minecraft.client.option.KeyBinding;
 import net.minecraft.client.util.math.MatrixStack;
+import net.minecraft.sound.SoundCategory;
+import net.minecraft.sound.SoundEvent;
+import net.minecraft.sound.SoundEvents;
 import org.lwjgl.glfw.GLFW;
 
 public class HudManager {
@@ -31,7 +35,9 @@ public class HudManager {
     }
 
     public void tick() {
+        MinecraftClient client = MinecraftClient.getInstance();
         if(this.keyBindingUp.wasPressed()) {
+            client.player.getWorld().playSound(client.player, client.player.getBlockPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 1f, 1f);
             if(!this.showHackList) {
                 if (this.selectedCategoryIndex == 0) {
                     this.selectedCategoryIndex = Category.values().length - 1;
@@ -46,6 +52,7 @@ public class HudManager {
                 }
             }
         } else if(this.keyBindingDown.wasPressed()) {
+            client.player.getWorld().playSound(client.player, client.player.getBlockPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 1f, 1f);
             if(!this.showHackList) {
                 if (this.selectedCategoryIndex == Category.values().length - 1) {
                     this.selectedCategoryIndex = 0;
@@ -60,12 +67,14 @@ public class HudManager {
                 }
             }
         } else if(this.keyBindingRight.wasPressed()) {
+            client.player.getWorld().playSound(client.player, client.player.getBlockPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 1f, 1f);
             if(!this.showHackList) {
                 this.showHackList = true;
             } else if(!this.showHackInfo) {
                 this.showHackInfo = true;
             }
         } else if(this.keyBindingLeft.wasPressed()) {
+            client.player.getWorld().playSound(client.player, client.player.getBlockPos(), SoundEvents.UI_BUTTON_CLICK.value(), SoundCategory.BLOCKS, 1f, 1f);
             if(this.showHackInfo) {
                 this.showHackInfo = false;
             } else if(this.showHackList) {
@@ -78,48 +87,39 @@ public class HudManager {
         MinecraftClient client = MinecraftClient.getInstance();
         InGameHud inGameHud = client.inGameHud;
         TextRenderer textRenderer = inGameHud.getTextRenderer();
-
         // HUD Title
         //DrawableHelper.drawStringWithShadow(matrices, textRenderer, "KClient 1.19.3", 4, 4, 0x00A3FC);
 
         // We draw the background box
-        DrawableHelper.fill(matrices, 0, 15, 76, 15 + 15 * Category.values().length, 0x80_000000);
+        RenderUtils.fill(matrices, 0, 15, 76, 15 * Category.values().length, 0x80_000000);
 
         // And then we add all the categories
         for(int i = 0; i < Category.values().length; i++) {
             if(this.selectedCategoryIndex == i) {
-                DrawableHelper.fill(matrices, 4, 15 + i * 15, 76, 30 + i * 15, 0x80_00A3FC);
-                //DrawableHelper.drawStringWithShadow(matrices, textRenderer, "> " + Category.values()[i].name().toLowerCase().substring(0, 1).toUpperCase() + Category.values()[i].name().toLowerCase().substring(1), 8, 19 + i * 15, 0x00A3FC);
+                RenderUtils.fill(matrices, 4, 15 + i * 15, 72, 15, 0x80_00A3FC);
                 DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">", 68, 19 + i * 15, 0xFFFFFF);
-            } else {
-                //DrawableHelper.drawStringWithShadow(matrices, textRenderer, Category.values()[i].name().toLowerCase().substring(0, 1).toUpperCase() + Category.values()[i].name().toLowerCase().substring(1), 8, 19 + i * 15, 0xFFFFFF);
             }
             DrawableHelper.drawStringWithShadow(matrices, textRenderer, Category.values()[i].name().toLowerCase().substring(0, 1).toUpperCase() + Category.values()[i].name().toLowerCase().substring(1), 8, 19 + i * 15, 0xFFFFFF);
-
-            DrawableHelper.fill(matrices, 0, 15 + i * 15, 4, 30 + i * 15, 0x80_00A3FC);
-            //DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">>", 63, 19 + i * 15, 0x00A3FC);
         }
+        RenderUtils.fill(matrices, 0, 15, 4, 15 * Category.values().length, 0x80_00A3FC);
 
+        // The hack list
         if(this.showHackList) {
-            DrawableHelper.fill(matrices, 84, 15, 86 + 84, 30 + 15 * KClient.getInstance().getHackManager().getHacksByCategory(Category.values()[this.selectedCategoryIndex]).size(), 0x80_000000);
-            DrawableHelper.fill(matrices, 84, 15, 86 + 84, 30, 0x80_00A3FC);
+            RenderUtils.fill(matrices, 84, 15, 86, 15 + 15 * KClient.getInstance().getHackManager().getHacksByCategory(Category.values()[this.selectedCategoryIndex]).size(), 0x80_000000);
+            RenderUtils.fill(matrices, 84, 15, 86, 15, 0x80_00A3FC);
             DrawableHelper.drawStringWithShadow(matrices, textRenderer, Category.values()[this.selectedCategoryIndex].name().toLowerCase().substring(0, 1).toUpperCase() + Category.values()[this.selectedCategoryIndex].name().toLowerCase().substring(1), 88, 19, 0xFFFFFF);
 
             for(int i = 0; i < KClient.getInstance().getHackManager().getHacksByCategory(Category.values()[this.selectedCategoryIndex]).size(); i++) {
                 if(this.selectedHackIndex == i) {
-                    //DrawableHelper.drawStringWithShadow(matrices, textRenderer, "> " + KClient.getInstance().getHackManager().getHacksByCategory(Category.values()[this.selectedCategoryIndex]).get(i).getName(), 88, 15 + 19 + i * 15, 0x00A3FC);
-
-                    DrawableHelper.fill(matrices, 84, 30 + i * 15, 86 + 84, 45 + i * 15, 0x80_00A3FC);
+                    RenderUtils.fill(matrices, 84, 30 + i * 15, 86, 15, 0x80_00A3FC);
                     DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">", 78 + 84, 15 + 19 + i * 15, 0xFFFFFF);
-                } else {
-                    //DrawableHelper.drawStringWithShadow(matrices, textRenderer, KClient.getInstance().getHackManager().getHacksByCategory(Category.values()[this.selectedCategoryIndex]).get(i).getName(), 88, 15 + 19 + i * 15, 0xFFFFFF);
                 }
                 int xOffset = this.selectedHackIndex == i ? -10 : 0;
                 if(KClient.getInstance().getHackManager().getHacksByCategory(Category.values()[this.selectedCategoryIndex]).get(i).isEnabled()) {
-                    DrawableHelper.fill(matrices, 147 + xOffset, 32 + i * 15, 147 + 21 + xOffset, 43 + i * 15, 0x80_109e00);
+                    RenderUtils.fill(matrices, 147 + xOffset, 32 + i * 15, 21, 11, 0x80_109e00);
                     DrawableHelper.drawStringWithShadow(matrices, textRenderer, "ON", 152 + xOffset, 15 + 19 + i * 15, 0xFFFFFF);
                 } else {
-                    DrawableHelper.fill(matrices, 147 + xOffset, 32 + i * 15, 147 + 21 + xOffset, 43 + i * 15, 0x80_D10000);
+                    RenderUtils.fill(matrices, 147 + xOffset, 32 + i * 15, 21, 11, 0x80_D10000);
                     DrawableHelper.drawStringWithShadow(matrices, textRenderer, "OFF", 149 + xOffset, 15 + 19 + i * 15, 0xFFFFFF);
                 }
                 DrawableHelper.drawStringWithShadow(matrices, textRenderer, KClient.getInstance().getHackManager().getHacksByCategory(Category.values()[this.selectedCategoryIndex]).get(i).getName(), 88, 15 + 19 + i * 15, 0xFFFFFF);
@@ -127,25 +127,10 @@ public class HudManager {
             }
         }
 
+        // Selected hack info
         if(this.showHackInfo) {
-            DrawableHelper.fill(matrices, 84 * 2, 15, 76 + 84 * 2, 115, 0x80_000000);
+            RenderUtils.fill(matrices, 84 * 2, 15, 200, 115, 0x80_000000);
         }
-        /*DrawableHelper.drawStringWithShadow(matrices, textRenderer, "> Combat", 4, 19, 0x00A3FC);
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">>", 63, 19, 0x00A3FC);
-
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, "Movement", 4, 34, 0xFFFFFF);
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">>", 63, 34, 0x00A3FC);
-
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, "Render", 4, 49, 0xFFFFFF);
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">>", 63, 49, 0x00A3FC);
-
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, "World", 4, 64, 0xFFFFFF);
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">>", 63, 64, 0x00A3FC);
-
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, "Misc", 4, 79, 0xFFFFFF);
-        DrawableHelper.drawStringWithShadow(matrices, textRenderer, ">>", 63, 79, 0x00A3FC);
-
-         */
     }
 
 }
